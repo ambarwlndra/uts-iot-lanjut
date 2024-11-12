@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Cuaca dari API</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        
+        /* Header styling */
+        h1 {
+            background: linear-gradient(135deg, #007bff, #4c9fef);
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            margin: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 1.8em;
+        }
+        
+        /* Container styling */
+        .data-container {
+            max-width: 900px;
+            background: #ffffff;
+            padding: 25px;
+            margin: 30px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Info card styling */
+        .info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .info div {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #eaf4ff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 10px;
+            transition: transform 0.2s;
+        }
+        .info div:hover {
+            transform: translateY(-5px);
+        }
+        .info div strong {
+            font-size: 1.3em;
+            color: #0056b3;
+        }
+        
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background-color: #ffffff;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+        tbody tr:nth-child(odd) {
+            background-color: #f7f9fc;
+        }
+        tbody tr:hover {
+            background-color: #d8e9ff;
+            transition: background-color 0.2s;
+        }
+        
+        /* Table header styling */
+        h3 {
+            color: #007bff;
+            margin-top: 40px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.4em;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Data Cuaca dari API</h1>
+<div class="data-container" id="data-container">
+    Memuat data...
+</div>
+
+<script>
+async function fetchData() {
+    try {
+        const response = await fetch("http://localhost/utsiotambar/get.php");
+        if (!response.ok) throw new Error("Gagal mengambil data dari server");
+        
+        const data = await response.json();
+        displayData(data);
+    } catch (error) {
+        document.getElementById('data-container').innerHTML = `Error: ${error.message}`;
+    }
+}
+
+function displayData(data) {
+    const container = document.getElementById('data-container');
+    container.innerHTML = `
+        <div class="info">
+            <div><strong>Suhu Maksimum</strong><br>${data.suhumax} °C</div>
+            <div><strong>Suhu Minimum</strong><br>${data.suhumin} °C</div>
+            <div><strong>Suhu Rata-rata</strong><br>${data.suhurata} °C</div>
+        </div>
+        
+        <h3>Data dengan Suhu Maksimum dan Kelembapan Tertinggi</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Suhu (°C)</th>
+                    <th>Kelembapan (%)</th>
+                    <th>Cahaya (Lux)</th>
+                    <th>Waktu</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.nilai_suhu_max_humid_max.map(entry => `
+                    <tr>
+                        <td>${entry.id}</td>
+                        <td>${entry.suhu}</td>
+                        <td>${entry.humid}</td>
+                        <td>${entry.lux}</td>
+                        <td>${entry.ts}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+
+        <h3>Kombinasi Bulan-Tahun Distinct</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bulan-Tahun</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${data.mount_year_max.map(month => `
+                    <tr>
+                        <td>${month.mount_years}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+// Fetch data from API when the page loads
+fetchData();
+</script>
+
+</body>
+</html>
